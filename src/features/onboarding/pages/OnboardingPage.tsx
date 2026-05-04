@@ -1,7 +1,9 @@
+import { OnboardingLayout } from '../components/OnboardingLayout'
+
 export function OnboardingPage() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl items-center justify-center px-6 py-12">
-      <h1 className="text-3xl font-semibold text-slate-900">Abertura de Conta</h1>
-    </main>
+    <OnboardingLayout currentStep={1}>
+      <h1 className="text-center text-lg font-medium text-slate-700 sm:text-xl">Etapa em construção</h1>
+    </OnboardingLayout>
   )
 }
