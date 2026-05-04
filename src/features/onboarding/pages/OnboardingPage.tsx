@@ -1,14 +1,16 @@
 import { useState } from 'react'
 
+import { AddressStep } from '../components/AddressStep'
 import { ContactStep } from '../components/ContactStep'
 import { OnboardingLayout } from '../components/OnboardingLayout'
 import { PersonalDataStep } from '../components/PersonalDataStep'
-import type { ContactFormData, PersonalDataFormData } from '../types/onboarding.types'
+import type { AddressFormData, ContactFormData, PersonalDataFormData } from '../types/onboarding.types'
 
 export function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [personalData, setPersonalData] = useState<PersonalDataFormData | null>(null)
   const [contactData, setContactData] = useState<ContactFormData | null>(null)
+  const [addressData, setAddressData] = useState<AddressFormData | null>(null)
 
   const handlePersonalDataSubmit = (data: PersonalDataFormData) => {
     setPersonalData(data)
@@ -20,8 +22,17 @@ export function OnboardingPage() {
     setCurrentStep(2)
   }
 
+  const handleAddressSubmit = (data: AddressFormData) => {
+    setAddressData(data)
+    setCurrentStep(3)
+  }
+
   const handleBackToPersonalData = () => {
     setCurrentStep(0)
+  }
+
+  const handleBackToContact = () => {
+    setCurrentStep(1)
   }
 
   return (
@@ -38,9 +49,17 @@ export function OnboardingPage() {
         />
       ) : null}
 
-      {currentStep >= 2 ? (
+      {currentStep === 2 ? (
+        <AddressStep
+          defaultValues={addressData ?? undefined}
+          onBack={handleBackToContact}
+          onSubmit={handleAddressSubmit}
+        />
+      ) : null}
+
+      {currentStep >= 3 ? (
         <div className="mx-auto w-full max-w-xl text-center">
-          <h1 className="text-2xl font-semibold text-slate-900">Etapa de endereço</h1>
+          <h1 className="text-2xl font-semibold text-slate-900">Etapa de documentos</h1>
           <p className="mt-2 text-sm text-slate-600">A próxima etapa será implementada em seguida.</p>
         </div>
       ) : null}
