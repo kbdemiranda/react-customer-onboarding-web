@@ -30,7 +30,7 @@ export function mapToCreateOnboardingPayload(
 ): CreateOnboardingPayload {
   return {
     fullName: personalData.fullName.trim(),
-    cpf: normalizeDigits(personalData.cpf),
+    cpf: normalizeDigits(personalData.nationality === 'brasileiro' ? personalData.cpf! : personalData.crnm!),
     emails: contactData.emails.map((item) => ({
       email: item.email.trim(),
       primaryEmail: item.primaryEmail,

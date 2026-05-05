@@ -54,11 +54,14 @@ export function PersonalDataStep({ defaultValues, onSubmit }: PersonalDataStepPr
     resolver: zodResolver(personalDataSchema),
     defaultValues: {
       fullName: defaultValues?.fullName ?? '',
+      nationality: defaultValues?.nationality ?? 'brasileiro',
       cpf: defaultValues?.cpf ?? '',
+      crnm: defaultValues?.crnm ?? '',
       birthDate: defaultValues?.birthDate ?? '',
     },
   })
 
+  const nationalityValue = watch('nationality')
   const cpfValue = watch('cpf')
   const birthDateValue = watch('birthDate')
 
@@ -75,6 +78,14 @@ export function PersonalDataStep({ defaultValues, onSubmit }: PersonalDataStepPr
       setValue('birthDate', maskedValue, { shouldDirty: true })
     }
   }, [birthDateValue, setValue])
+
+  useEffect(() => {
+    if (nationalityValue === 'brasileiro') {
+      setValue('crnm', '', { shouldValidate: false })
+    } else {
+      setValue('cpf', '', { shouldValidate: false })
+    }
+  }, [nationalityValue, setValue])
 
   return (
     <div className="mx-auto w-full">
@@ -104,19 +115,25 @@ export function PersonalDataStep({ defaultValues, onSubmit }: PersonalDataStepPr
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div className="space-y-2">
-            <label htmlFor="cpf" className="block text-sm font-medium text-slate-700">
-              CPF
+            <label htmlFor="nationality" className="block text-sm font-medium text-slate-700">
+              Nacionalidade
             </label>
-            <input
-              id="cpf"
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              className="w-full rounded-md border border-slate-300 px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#003399] focus:ring-1 focus:ring-[#003399]"
-              placeholder="000.000.000-00"
-              {...register('cpf')}
-            />
-            {errors.cpf ? <p className="text-sm text-red-600">{errors.cpf.message}</p> : null}
+            <div className="relative">
+              <select
+                id="nationality"
+                className="w-full appearance-none rounded-md border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-[#003399] focus:ring-1 focus:ring-[#003399]"
+                {...register('nationality')}
+              >
+                <option value="brasileiro">Brasileiro</option>
+                <option value="estrangeiro">Estrangeiro</option>
+              </select>
+              <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            {errors.nationality ? <p className="text-sm text-red-600">{errors.nationality.message}</p> : null}
           </div>
 
           <div className="space-y-2">
@@ -134,6 +151,41 @@ export function PersonalDataStep({ defaultValues, onSubmit }: PersonalDataStepPr
             />
             {errors.birthDate ? <p className="text-sm text-red-600">{errors.birthDate.message}</p> : null}
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {nationalityValue === 'brasileiro' ? (
+            <div className="space-y-2">
+              <label htmlFor="cpf" className="block text-sm font-medium text-slate-700">
+                CPF
+              </label>
+              <input
+                id="cpf"
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                className="w-full rounded-md border border-slate-300 px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#003399] focus:ring-1 focus:ring-[#003399]"
+                placeholder="000.000.000-00"
+                {...register('cpf')}
+              />
+              {errors.cpf ? <p className="text-sm text-red-600">{errors.cpf.message}</p> : null}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <label htmlFor="crnm" className="block text-sm font-medium text-slate-700">
+                CRNM
+              </label>
+              <input
+                id="crnm"
+                type="text"
+                autoComplete="off"
+                className="w-full rounded-md border border-slate-300 px-4 py-3 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#003399] focus:ring-1 focus:ring-[#003399]"
+                placeholder="Informe seu CRNM"
+                {...register('crnm')}
+              />
+              {errors.crnm ? <p className="text-sm text-red-600">{errors.crnm.message}</p> : null}
+            </div>
+          )}
         </div>
 
         <div className="pt-4">

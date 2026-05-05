@@ -73,8 +73,12 @@ export function ReviewStep({
               <p className="text-[15px] font-medium text-slate-900">{personalData.fullName}</p>
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">CPF</p>
-              <p className="text-[15px] font-medium text-slate-900">{personalData.cpf}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                {personalData.nationality === 'brasileiro' ? 'CPF' : 'CRNM'}
+              </p>
+              <p className="text-[15px] font-medium text-slate-900">
+                {personalData.nationality === 'brasileiro' ? personalData.cpf : personalData.crnm}
+              </p>
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Data de Nascimento</p>
@@ -82,7 +86,7 @@ export function ReviewStep({
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nacionalidade</p>
-              <p className="text-[15px] font-medium text-slate-900">Brasileiro</p>
+              <p className="text-[15px] font-medium text-slate-900 capitalize">{personalData.nationality}</p>
             </div>
           </div>
         </div>

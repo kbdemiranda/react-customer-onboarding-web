@@ -10,7 +10,7 @@ const emailItemSchema = z.object({
 })
 
 const phoneItemSchema = z.object({
-  phoneNumber: z.string().trim().min(1, 'Telefone é obrigatório'),
+  phoneNumber: z.string().trim().min(1, 'Telefone é obrigatório').refine(val => /^\(\d{2}\) \d{4,5}-\d{4}$/.test(val), { message: 'Formato inválido. Use (00) 00000-0000' }),
   primaryPhone: z.boolean(),
 })
 
