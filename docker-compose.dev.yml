@@ -5,9 +5,7 @@ services:
       context: .
       target: production
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
-    env_file:
-      - ./docker/env/dev.env
+        VITE_API_BASE_URL: ${DEV_VITE_API_BASE_URL:-https://dev-api.seu-dominio.com}
     ports:
-      - "${FRONTEND_PORT:-4173}:80"
+      - "${DEV_FRONTEND_PORT:-4173}:80"
     restart: unless-stopped

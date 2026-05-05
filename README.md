@@ -87,13 +87,22 @@ src/
 
 ## Environment Variables
 
-The frontend uses the backend base URL from Vite env:
+The frontend uses environment variables loaded from `.env`.
 
 ```bash
 VITE_API_BASE_URL=http://localhost:8080
+LOCAL_FRONTEND_PORT=5173
+DEV_VITE_API_BASE_URL=https://dev-api.seu-dominio.com
+DEV_FRONTEND_PORT=4173
+PROD_VITE_API_BASE_URL=https://api.seu-dominio.com
+PROD_FRONTEND_PORT=80
 ```
 
-You can copy from `.env.example`.
+Setup:
+
+```bash
+cp .env.model .env
+```
 
 ## Getting Started (Node.js)
 
@@ -148,7 +157,7 @@ npm run test:watch
 This repository includes a multi-stage Docker setup and three Docker Compose files:
 
 - `docker-compose.local.yml` -> local development container (Vite + HMR)
-- `docker-compose.dev.yml` -> production-like build with dev environment variables
+- `docker-compose.dev.yml` -> production-like build with dev variables
 - `docker-compose.prod.yml` -> production build/runtime
 
 ### Docker Files
@@ -157,14 +166,13 @@ This repository includes a multi-stage Docker setup and three Docker Compose fil
   - `development` stage: runs Vite dev server on `5173`
   - `production` stage: serves static build with Nginx on `80`
 - `docker/nginx/default.conf`: SPA routing fallback (`/index.html`)
-- `docker/env/local.env`
-- `docker/env/dev.env`
-- `docker/env/prod.env`
+- `.env.model` (tracked template)
+- `.env` (local file, gitignored)
 
 ### Run Local Docker (HMR)
 
 ```bash
-docker compose --env-file docker/env/local.env -f docker-compose.local.yml up --build
+docker compose -f docker-compose.local.yml up --build
 ```
 
 Access app:
@@ -173,7 +181,7 @@ Access app:
 ### Run Dev Docker
 
 ```bash
-docker compose --env-file docker/env/dev.env -f docker-compose.dev.yml up --build
+docker compose -f docker-compose.dev.yml up --build
 ```
 
 Access app:
@@ -182,7 +190,7 @@ Access app:
 ### Run Prod Docker
 
 ```bash
-docker compose --env-file docker/env/prod.env -f docker-compose.prod.yml up --build -d
+docker compose -f docker-compose.prod.yml up --build -d
 ```
 
 Access app:
