@@ -1,4 +1,4 @@
-export type LookupMode = 'externalId' | 'cpf'
+export type LookupMode = 'protocol' | 'cpf'
 
 export type LookupResolution =
   | {
@@ -11,14 +11,18 @@ export type LookupResolution =
       error: string
     }
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const PROTOCOL_REGEX = /^\d{14}$/
 
 export function normalizeCpf(value: string) {
   return value.replace(/\D/g, '')
 }
 
-export function isUuid(value: string) {
-  return UUID_REGEX.test(value.trim())
+export function normalizeProtocol(value: string) {
+  return value.replace(/\D/g, '')
+}
+
+export function isValidProtocol(value: string) {
+  return PROTOCOL_REGEX.test(value.trim())
 }
 
 export function isValidCpf(value: string) {
@@ -32,14 +36,16 @@ export function resolveLookupInput(rawValue: string): LookupResolution {
     return {
       mode: null,
       value: null,
-      error: 'Informe um CPF ou ID válido para continuar.',
+      error: 'Informe um CPF ou protocolo válido.',
     }
   }
 
-  if (isUuid(trimmedValue)) {
+  const protocol = normalizeProtocol(trimmedValue)
+
+  if (isValidProtocol(protocol)) {
     return {
-      mode: 'externalId',
-      value: trimmedValue,
+      mode: 'protocol',
+      value: protocol,
     }
   }
 
@@ -55,7 +61,7 @@ export function resolveLookupInput(rawValue: string): LookupResolution {
   return {
     mode: null,
     value: null,
-    error: 'CPF ou ID inválido. Verifique os dados e tente novamente.',
+    error: 'Informe um CPF ou protocolo válido.',
   }
 }
 

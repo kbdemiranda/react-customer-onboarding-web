@@ -6,11 +6,11 @@ import { useNavigate } from 'react-router-dom'
 import { AppLayout } from '../../../components/layout/AppLayout'
 import {
   getOnboardingAuditLogs,
-  getOnboardingByExternalId,
+  getOnboardingByProtocol,
   getOnboardingDocuments,
   searchOnboardingsByCpf,
 } from '../api/onboardingApi'
-import type { OnboardingItem, OnboardingStatus } from '../types/onboarding.types'
+import type { DocumentType, OnboardingAddress, OnboardingItem, OnboardingStatus } from '../types/onboarding.types'
 import { maskCpf, resolveLookupInput } from '../utils/lookupUtils'
 
 type BackendErrorResponse = {
@@ -31,8 +31,54 @@ const STATUS_LABELS: Record<string, string> = {
   REJECTED: 'Rejeitado',
 }
 
+const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
+  CPF: 'CPF',
+  IDENTITY_REGISTER: 'RG',
+  DRIVER_LICENSE: 'CNH',
+  PASSPORT: 'Passaporte',
+  PROOF_OF_ADDRESS: 'Comprovante de residência',
+}
+
+const AUDIT_ACTION_LABELS: Record<string, string> = {
+  CREATED: 'Cadastro criado',
+  UPDATED: 'Cadastro atualizado',
+  STATUS_CHANGED: 'Status atualizado',
+  DOCUMENT_UPLOADED: 'Documento enviado',
+  DOCUMENT_REMOVED: 'Documento removido',
+}
+
 function getStatusLabel(status: OnboardingStatus) {
   return STATUS_LABELS[status] ?? 'Status indisponível'
+}
+
+function getDocumentTypeLabel(documentType: string) {
+  const label = DOCUMENT_TYPE_LABELS[documentType as DocumentType]
+  if (!label) {
+    return documentType
+  }
+  return label
+}
+
+function getAuditActionLabel(action?: string) {
+  if (!action) {
+    return 'Atualização'
+  }
+
+  const label = AUDIT_ACTION_LABELS[action]
+  if (!label) {
+    return action
+  }
+
+  return label
+}
+
+function formatFullAddress(address: OnboardingAddress) {
+  const firstLine = [address.street, address.number, address.complement].filter(Boolean).join(', ')
+  const cityAndState = [address.city, address.state].filter(Boolean).join('/')
+  const secondLine = [address.neighborhood, cityAndState].filter(Boolean).join(' - ')
+  const postalLine = address.zipCode ? `CEP ${address.zipCode}` : ''
+
+  return [firstLine, secondLine, postalLine].filter(Boolean).join(' | ') || 'Endereço não informado'
 }
 
 function getStatusBadgeClass(status: OnboardingStatus) {
@@ -92,26 +138,24 @@ export function OnboardingStatusPage() {
         throw new Error(resolution.error)
       }
 
-      if (resolution.mode === 'externalId') {
-        try {
-          const item = await getOnboardingByExternalId(resolution.value)
-          return { kind: 'found', onboarding: item }
-        } catch (error) {
-          if (error instanceof AxiosError && error.response?.status === 404) {
-            return { kind: 'not_found' }
-          }
-          throw error
+      if (resolution.mode === 'cpf') {
+        const response = await searchOnboardingsByCpf(resolution.value)
+        const item = response.content?.[0]
+        if (!item) {
+          return { kind: 'not_found' }
         }
+        return { kind: 'found', onboarding: item }
       }
 
-      const response = await searchOnboardingsByCpf(resolution.value)
-      const item = response.content?.[0]
-
-      if (!item) {
-        return { kind: 'not_found' }
+      try {
+        const item = await getOnboardingByProtocol(resolution.value)
+        return { kind: 'found', onboarding: item }
+      } catch (error) {
+        if (error instanceof AxiosError && error.response?.status === 404) {
+          return { kind: 'not_found' }
+        }
+        throw error
       }
-
-      return { kind: 'found', onboarding: item }
     },
     onMutate: () => {
       setValidationError(null)
@@ -169,16 +213,18 @@ export function OnboardingStatusPage() {
           <form onSubmit={handleSearch} className="space-y-4" noValidate>
             <div className="space-y-2">
               <label htmlFor="lookup" className="block text-sm font-medium text-slate-700">
-                CPF ou ID do cadastro
+                CPF ou Protocolo
               </label>
               <input
                 id="lookup"
                 type="text"
                 value={searchValue}
-                onChange={(event) => setSearchValue(event.target.value)}
-                placeholder="Digite seu CPF ou ID"
+                onChange={(event) => setSearchValue(event.target.value.replace(/\D/g, '').slice(0, 14))}
+                placeholder="Digite aqui o protocolo ou CPF"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
                 autoComplete="off"
+                inputMode="numeric"
+                maxLength={14}
               />
             </div>
 
@@ -204,7 +250,7 @@ export function OnboardingStatusPage() {
 
           {!lookupMutation.isPending && !lookupResult && !validationError && !lookupError ? (
             <p className="mt-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-              Informe seu CPF ou ID para consultar seu cadastro.
+              Informe seu CPF ou protocolo para consultar seu cadastro.
             </p>
           ) : null}
 
@@ -237,6 +283,10 @@ export function OnboardingStatusPage() {
                   </span>
                 </div>
                 <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Protocolo</p>
+                  <p className="mt-1 text-sm font-medium text-slate-900">{onboarding.protocol ?? '-'}</p>
+                </div>
+                <div>
                   <p className="text-xs uppercase tracking-wide text-slate-500">Data de criação</p>
                   <p className="mt-1 text-sm font-medium text-slate-900">{formatDate(onboarding.createdAt)}</p>
                 </div>
@@ -256,7 +306,7 @@ export function OnboardingStatusPage() {
                     <h2 className="text-sm font-semibold text-slate-900">Dados pessoais</h2>
                     <p className="mt-1 text-sm text-slate-700">Nome: {onboarding.fullName ?? '-'}</p>
                     <p className="text-sm text-slate-700">CPF: {maskCpf(onboarding.cpf ?? '')}</p>
-                    <p className="text-sm text-slate-700">ID: {onboarding.externalId}</p>
+                    <p className="text-sm text-slate-700">Protocolo: {onboarding.protocol ?? '-'}</p>
                   </div>
 
                   <div>
@@ -285,8 +335,7 @@ export function OnboardingStatusPage() {
                       <ul className="mt-1 space-y-1 text-sm text-slate-700">
                         {onboarding.addresses.map((item, index) => (
                           <li key={`${item.zipCode}-${item.number}-${index}`}>
-                            CEP: {item.zipCode} | Número: {item.number}
-                            {item.complement ? ` | Complemento: ${item.complement}` : ''}
+                            {formatFullAddress(item)}
                           </li>
                         ))}
                       </ul>
@@ -306,7 +355,7 @@ export function OnboardingStatusPage() {
                       <ul className="mt-1 space-y-1 text-sm text-slate-700">
                         {documentsQuery.data.map((item, index) => (
                           <li key={`${item.id ?? item.documentType ?? 'document'}-${index}`}>
-                            Tipo: {item.documentType ?? 'Não informado'}
+                            Tipo: {item.documentType ? getDocumentTypeLabel(item.documentType) : 'Não informado'}
                           </li>
                         ))}
                       </ul>
@@ -322,7 +371,7 @@ export function OnboardingStatusPage() {
                       <ul className="mt-1 space-y-1 text-sm text-slate-700">
                         {auditLogsQuery.data.map((item, index) => (
                           <li key={`${item.id ?? item.action ?? 'audit-log'}-${index}`}>
-                            {item.action ?? 'Atualização'} {item.createdAt ? `em ${formatDate(item.createdAt)}` : ''}
+                            {getAuditActionLabel(item.action)} {item.createdAt ? `em ${formatDate(item.createdAt)}` : ''}
                           </li>
                         ))}
                       </ul>

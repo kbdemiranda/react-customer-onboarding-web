@@ -38,6 +38,10 @@ export type OnboardingPhone = {
 }
 
 export type OnboardingAddress = {
+  street?: string
+  neighborhood?: string
+  city?: string
+  state?: string
   zipCode: string
   number: string
   complement?: string | null
@@ -46,6 +50,7 @@ export type OnboardingAddress = {
 
 export type OnboardingItem = {
   externalId: string
+  protocol?: string
   fullName: string
   cpf: string
   status: OnboardingStatus

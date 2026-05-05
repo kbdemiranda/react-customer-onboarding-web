@@ -11,6 +11,7 @@ import type { CreateOnboardingPayload } from './onboardingPayloadMapper'
 
 export type CreateOnboardingResponse = {
   externalId: string
+  protocol?: string
 }
 
 export async function createOnboarding(payload: CreateOnboardingPayload) {
@@ -78,8 +79,8 @@ export async function uploadDocument(externalId: string, documentType: DocumentT
   return data
 }
 
-export async function getOnboardingByExternalId(externalId: string) {
-  const { data } = await httpClient.get<OnboardingItem>(`/api/v1/onboardings/${externalId}`)
+export async function getOnboardingByProtocol(protocol: string) {
+  const { data } = await httpClient.get<OnboardingItem>(`/api/v1/onboardings/protocol/${protocol}`)
   return data
 }
 

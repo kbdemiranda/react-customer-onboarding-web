@@ -19,7 +19,7 @@ type BackendErrorResponse = {
 }
 
 type SubmissionResult = {
-  externalId: string
+  protocol: string
   partialFailureMessage?: string
 }
 
@@ -92,6 +92,9 @@ export function OnboardingPage() {
       if (!createResponse.externalId) {
         throw new Error('Protocolo não retornado pela API')
       }
+      if (!createResponse.protocol) {
+        throw new Error('Protocolo não retornado pela API')
+      }
 
       let failedUploads = 0
 
@@ -110,7 +113,7 @@ export function OnboardingPage() {
 
       if (failedUploads > 0) {
         setSubmissionResult({
-          externalId: createResponse.externalId,
+          protocol: createResponse.protocol,
           partialFailureMessage:
             'Seu cadastro foi criado, mas um ou mais documentos não puderam ser enviados. Você pode acompanhar com o protocolo.',
         })
@@ -118,7 +121,7 @@ export function OnboardingPage() {
       }
 
       setSubmissionResult({
-        externalId: createResponse.externalId,
+        protocol: createResponse.protocol,
       })
     } catch (error) {
       setSubmitError(getErrorMessage(error, 'Não foi possível enviar o cadastro. Tente novamente.'))
@@ -198,7 +201,7 @@ export function OnboardingPage() {
 
           <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-5 text-left">
             <p className="text-sm text-green-800">Protocolo</p>
-            <p className="text-lg font-semibold text-green-900">{submissionResult.externalId}</p>
+            <p className="text-lg font-semibold text-green-900">{submissionResult.protocol}</p>
           </div>
 
           {submissionResult.partialFailureMessage ? (
