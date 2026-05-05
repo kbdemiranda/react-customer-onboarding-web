@@ -13,7 +13,7 @@ const fileSchema = z
     message: 'Formato inválido. Envie PDF, PNG ou JPG',
   })
   .refine((file) => file.size <= MAX_FILE_SIZE, {
-    message: 'O arquivo deve ter no máximo 5MB',
+    message: 'O arquivo deve ter no máximo 10MB',
   })
 
 export const documentItemSchema = z.object({
@@ -23,6 +23,8 @@ export const documentItemSchema = z.object({
 
 export const documentSchema = z.object({
   documents: z.array(documentItemSchema).min(1, 'Adicione pelo menos um documento'),
+  identityType: z.enum(['RG', 'CNH']).optional(),
+  cnhDigital: z.boolean().optional(),
 })
 
 export type DocumentSchema = z.infer<typeof documentSchema>

@@ -208,6 +208,7 @@ export function OnboardingPage() {
           submitError={submitError}
           onBack={handleBackToDocuments}
           onSubmit={handleReviewSubmit}
+          onEditStep={setCurrentStep}
         />
       ) : null}
     </OnboardingLayout>

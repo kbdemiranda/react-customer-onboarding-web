@@ -162,8 +162,8 @@ export function DocumentsStep({ defaultValues, onBack, onSubmit }: DocumentsStep
   } = useForm<LocalDocumentData>({
     resolver: zodResolver(localDocumentSchema),
     defaultValues: {
-      identityType: 'RG',
-      cnhDigital: false,
+      identityType: defaultValues?.identityType ?? 'RG',
+      cnhDigital: defaultValues?.cnhDigital ?? false,
       frontFile: defaultFrontFile,
       backFile: defaultBackFile,
       proofOfAddress: defaultProofOfAddress,
@@ -187,7 +187,11 @@ export function DocumentsStep({ defaultValues, onBack, onSubmit }: DocumentsStep
       documents.push({ documentType: 'PROOF_OF_ADDRESS', file: data.proofOfAddress as File })
     }
 
-    return onSubmit({ documents })
+    return onSubmit({ 
+      documents,
+      identityType: data.identityType,
+      cnhDigital: data.cnhDigital,
+    })
   }
 
   return (
