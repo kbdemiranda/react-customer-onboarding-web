@@ -1,0 +1,55 @@
+services:
+  app:
+    container_name: onboarding-api-hub
+    image: ${APP_IMAGE_HUB:-kbdemiranda/java-customer-onboarding-api:latest}
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      ZIP_CODE_WIREMOCK_BASE_URL: http://wiremock:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      wiremock:
+        condition: service_started
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    restart: unless-stopped
+
+  frontend:
+    container_name: onboarding-web-hub
+    image: ${FRONTEND_IMAGE_HUB:-kbdemiranda/react-customer-onboarding-web:latest}
+    depends_on:
+      app:
+        condition: service_started
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    restart: unless-stopped
+
+  postgres:
+    container_name: onboarding-postgres-hub
+    image: postgres:17-alpine
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data_hub:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  wiremock:
+    container_name: onboarding-wiremock-hub
+    image: wiremock/wiremock:3.13.1
+    ports:
+      - "${WIREMOCK_PORT:-8081}:8080"
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings:ro
+    restart: unless-stopped
+
+volumes:
+  postgres_data_hub:

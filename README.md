@@ -96,6 +96,15 @@ DEV_VITE_API_BASE_URL=https://dev-api.seu-dominio.com
 DEV_FRONTEND_PORT=4173
 PROD_VITE_API_BASE_URL=https://api.seu-dominio.com
 PROD_FRONTEND_PORT=80
+APP_IMAGE_HUB=kbdemiranda/java-customer-onboarding-api:latest
+FRONTEND_IMAGE_HUB=kbdemiranda/react-customer-onboarding-web:latest
+SERVER_PORT=8080
+FRONTEND_PORT=3000
+POSTGRES_PORT=5432
+POSTGRES_DB=onboarding
+POSTGRES_USER=onboarding
+POSTGRES_PASSWORD=onboarding
+WIREMOCK_PORT=8081
 ```
 
 Setup:
@@ -159,6 +168,7 @@ This repository includes a multi-stage Docker setup and three Docker Compose fil
 - `docker-compose.local.yml` -> local development container (Vite + HMR)
 - `docker-compose.dev.yml` -> production-like build with dev variables
 - `docker-compose.prod.yml` -> production build/runtime
+- `docker-compose.hub.yml` -> run API + frontend + Postgres + WireMock using Docker Hub images
 
 ### Docker Files
 
@@ -202,7 +212,43 @@ Access app:
 docker compose -f docker-compose.local.yml down
 docker compose -f docker-compose.dev.yml down
 docker compose -f docker-compose.prod.yml down
+docker compose -f docker-compose.hub.yml down
 ```
+
+### Run from Docker Hub Images (API + Frontend)
+
+This flow uses pre-built images from Docker Hub and includes backend dependencies:
+
+- `kbdemiranda/react-customer-onboarding-web`
+- `kbdemiranda/java-customer-onboarding-api`
+- `postgres:17-alpine`
+- `wiremock/wiremock:3.13.1`
+
+Start containers:
+
+```bash
+cp .env.hub.model .env
+docker compose -f docker-compose.hub.yml up -d
+```
+
+Access:
+- Frontend: `http://localhost:3000`
+- API: `http://localhost:8080`
+- WireMock: `http://localhost:8081`
+- Postgres: `localhost:5432`
+
+Optional (pin image tags):
+
+```bash
+APP_IMAGE_HUB=kbdemiranda/java-customer-onboarding-api:latest \
+FRONTEND_IMAGE_HUB=kbdemiranda/react-customer-onboarding-web:latest \
+docker compose -f docker-compose.hub.yml up -d
+```
+
+Important:
+- The frontend image is static and uses the API base URL defined at image build time (`VITE_API_BASE_URL`).
+- If you need a different API URL in the frontend, publish a new frontend image tag built with the target `VITE_API_BASE_URL`.
+- WireMock mappings should be placed in `wiremock/mappings` (this repository includes the folder scaffold).
 
 ## API Integration
 
