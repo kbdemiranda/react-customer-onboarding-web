@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom'
 
 import { AppLayout } from '../../../components/layout/AppLayout'
 import {
-  getOnboardingAuditLogs,
   getOnboardingByProtocol,
   getOnboardingDocuments,
   searchOnboardingsByCpf,
@@ -39,14 +38,6 @@ const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   PROOF_OF_ADDRESS: 'Comprovante de residência',
 }
 
-const AUDIT_ACTION_LABELS: Record<string, string> = {
-  CREATED: 'Cadastro criado',
-  UPDATED: 'Cadastro atualizado',
-  STATUS_CHANGED: 'Status atualizado',
-  DOCUMENT_UPLOADED: 'Documento enviado',
-  DOCUMENT_REMOVED: 'Documento removido',
-}
-
 function getStatusLabel(status: OnboardingStatus) {
   return STATUS_LABELS[status] ?? 'Status indisponível'
 }
@@ -59,19 +50,6 @@ function getDocumentTypeLabel(documentType: string) {
   return label
 }
 
-function getAuditActionLabel(action?: string) {
-  if (!action) {
-    return 'Atualização'
-  }
-
-  const label = AUDIT_ACTION_LABELS[action]
-  if (!label) {
-    return action
-  }
-
-  return label
-}
-
 function formatFullAddress(address: OnboardingAddress) {
   const firstLine = [address.street, address.number, address.complement].filter(Boolean).join(', ')
   const cityAndState = [address.city, address.state].filter(Boolean).join('/')
@@ -79,6 +57,24 @@ function formatFullAddress(address: OnboardingAddress) {
   const postalLine = address.zipCode ? `CEP ${address.zipCode}` : ''
 
   return [firstLine, secondLine, postalLine].filter(Boolean).join(' | ') || 'Endereço não informado'
+}
+
+function ReadonlyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</label>
+      <div className="mt-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800">{value}</div>
+    </div>
+  )
+}
+
+function ReadonlyGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-4">
+      <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+      <div className="mt-3 space-y-3">{children}</div>
+    </section>
+  )
 }
 
 function getStatusBadgeClass(status: OnboardingStatus) {
@@ -181,20 +177,13 @@ export function OnboardingStatusPage() {
     enabled: detailsOpen && Boolean(onboardingExternalId),
   })
 
-  const auditLogsQuery = useQuery({
-    queryKey: ['onboarding-audit-logs', onboardingExternalId],
-    queryFn: () => getOnboardingAuditLogs(onboardingExternalId as string),
-    enabled: detailsOpen && Boolean(onboardingExternalId),
-  })
-
-  const detailsLoading = documentsQuery.isLoading || auditLogsQuery.isLoading
+  const detailsLoading = documentsQuery.isLoading
   const detailsError = useMemo(() => {
-    const hasError = documentsQuery.isError || auditLogsQuery.isError
-    if (!hasError) {
+    if (!documentsQuery.isError) {
       return null
     }
     return 'Não foi possível carregar todos os detalhes neste momento.'
-  }, [auditLogsQuery.isError, documentsQuery.isError])
+  }, [documentsQuery.isError])
 
   const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -301,82 +290,69 @@ export function OnboardingStatusPage() {
               </button>
 
               {detailsOpen ? (
-                <div className="mt-5 space-y-5 border-t border-slate-200 pt-5">
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-900">Dados pessoais</h2>
-                    <p className="mt-1 text-sm text-slate-700">Nome: {onboarding.fullName ?? '-'}</p>
-                    <p className="text-sm text-slate-700">CPF: {maskCpf(onboarding.cpf ?? '')}</p>
-                    <p className="text-sm text-slate-700">Protocolo: {onboarding.protocol ?? '-'}</p>
-                  </div>
+                <div className="mt-5 space-y-4 border-t border-slate-200 pt-5">
+                  <ReadonlyGroup title="Dados pessoais">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <ReadonlyField label="Nome" value={onboarding.fullName ?? '-'} />
+                      <ReadonlyField label="CPF" value={maskCpf(onboarding.cpf ?? '')} />
+                      <ReadonlyField label="Protocolo" value={onboarding.protocol ?? '-'} />
+                    </div>
+                  </ReadonlyGroup>
 
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-900">Contatos</h2>
-                    {onboarding.emails?.length ? (
-                      <ul className="mt-1 space-y-1 text-sm text-slate-700">
-                        {onboarding.emails.map((item, index) => (
-                          <li key={`${item.email}-${index}`}>E-mail: {item.email}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-1 text-sm text-slate-600">Nenhum contato encontrado.</p>
-                    )}
-                    {onboarding.phones?.length ? (
-                      <ul className="mt-2 space-y-1 text-sm text-slate-700">
-                        {onboarding.phones.map((item, index) => (
-                          <li key={`${item.phoneNumber}-${index}`}>Telefone: {item.phoneNumber}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
+                  <ReadonlyGroup title="Contatos">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {onboarding.emails?.length ? (
+                        onboarding.emails.map((item, index) => (
+                          <ReadonlyField
+                            key={`${item.email}-${index}`}
+                            label={onboarding.emails && onboarding.emails.length > 1 ? `E-mail ${index + 1}` : 'E-mail'}
+                            value={item.email}
+                          />
+                        ))
+                      ) : (
+                        <ReadonlyField label="E-mail" value="Não informado" />
+                      )}
+                      {onboarding.phones?.length ? (
+                        onboarding.phones.map((item, index) => (
+                          <ReadonlyField
+                            key={`${item.phoneNumber}-${index}`}
+                            label={onboarding.phones && onboarding.phones.length > 1 ? `Telefone ${index + 1}` : 'Telefone'}
+                            value={item.phoneNumber}
+                          />
+                        ))
+                      ) : (
+                        <ReadonlyField label="Telefone" value="Não informado" />
+                      )}
+                    </div>
+                  </ReadonlyGroup>
 
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-900">Endereços</h2>
-                    {onboarding.addresses?.length ? (
-                      <ul className="mt-1 space-y-1 text-sm text-slate-700">
-                        {onboarding.addresses.map((item, index) => (
-                          <li key={`${item.zipCode}-${item.number}-${index}`}>
-                            {formatFullAddress(item)}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-1 text-sm text-slate-600">Nenhum endereço encontrado.</p>
-                    )}
-                  </div>
+                  <ReadonlyGroup title="Endereços">
+                    <div className="space-y-3">
+                      {onboarding.addresses?.length ? (
+                        onboarding.addresses.map((item, index) => (
+                          <ReadonlyField key={`${item.zipCode}-${item.number}-${index}`} label={`Endereço ${index + 1}`} value={formatFullAddress(item)} />
+                        ))
+                      ) : (
+                        <ReadonlyField label="Endereço" value="Não informado" />
+                      )}
+                    </div>
+                  </ReadonlyGroup>
 
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-900">Documentos</h2>
-                    {detailsLoading ? <p className="mt-1 text-sm text-slate-600">Carregando detalhes...</p> : null}
-                    {detailsError ? <p className="mt-1 text-sm text-red-600">{detailsError}</p> : null}
-                    {!detailsLoading && !documentsQuery.data?.length ? (
-                      <p className="mt-1 text-sm text-slate-600">Nenhum documento encontrado.</p>
-                    ) : null}
+                  <ReadonlyGroup title="Documentos">
+                    {detailsLoading ? <p className="text-sm text-slate-600">Carregando detalhes...</p> : null}
+                    {detailsError ? <p className="text-sm text-red-600">{detailsError}</p> : null}
+                    {!detailsLoading && !documentsQuery.data?.length ? <ReadonlyField label="Documento" value="Nenhum documento encontrado" /> : null}
                     {documentsQuery.data?.length ? (
-                      <ul className="mt-1 space-y-1 text-sm text-slate-700">
+                      <ul className="list-disc space-y-1 pl-5 text-sm text-slate-800">
                         {documentsQuery.data.map((item, index) => (
                           <li key={`${item.id ?? item.documentType ?? 'document'}-${index}`}>
-                            Tipo: {item.documentType ? getDocumentTypeLabel(item.documentType) : 'Não informado'}
+                            {item.documentType ? getDocumentTypeLabel(item.documentType) : 'Não informado'}
                           </li>
                         ))}
                       </ul>
                     ) : null}
-                  </div>
+                  </ReadonlyGroup>
 
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-900">Auditoria</h2>
-                    {!detailsLoading && !auditLogsQuery.data?.length ? (
-                      <p className="mt-1 text-sm text-slate-600">Nenhum registro de auditoria encontrado.</p>
-                    ) : null}
-                    {auditLogsQuery.data?.length ? (
-                      <ul className="mt-1 space-y-1 text-sm text-slate-700">
-                        {auditLogsQuery.data.map((item, index) => (
-                          <li key={`${item.id ?? item.action ?? 'audit-log'}-${index}`}>
-                            {getAuditActionLabel(item.action)} {item.createdAt ? `em ${formatDate(item.createdAt)}` : ''}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
                 </div>
               ) : null}
             </div>
