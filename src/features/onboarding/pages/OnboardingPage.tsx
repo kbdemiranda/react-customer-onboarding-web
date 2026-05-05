@@ -25,6 +25,10 @@ type SubmissionResult = {
 
 function getErrorMessage(error: unknown, fallbackMessage: string) {
   if (error instanceof AxiosError) {
+    if (error.code === 'ERR_NETWORK' || !error.response) {
+      return 'Não foi possível conectar ao servidor.'
+    }
+
     const data = error.response?.data as BackendErrorResponse | undefined
     return data?.message ?? data?.detail ?? fallbackMessage
   }

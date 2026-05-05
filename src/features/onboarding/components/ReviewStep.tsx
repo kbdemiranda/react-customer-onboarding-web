@@ -67,8 +67,12 @@ export function ReviewStep({
             {addressData.addresses.map((item, index) => (
               <div key={`address-${index}`} className="rounded-lg border border-slate-200 p-3">
                 <p className="text-sm text-slate-800">CEP: {item.zipCode}</p>
+                <p className="text-sm text-slate-800">Logradouro: {item.street?.trim() ? item.street : '-'}</p>
                 <p className="text-sm text-slate-800">Número: {item.number}</p>
                 <p className="text-sm text-slate-800">Complemento: {item.complement?.trim() ? item.complement : '-'}</p>
+                <p className="text-sm text-slate-800">Bairro: {item.neighborhood?.trim() ? item.neighborhood : '-'}</p>
+                <p className="text-sm text-slate-800">Cidade: {item.city?.trim() ? item.city : '-'}</p>
+                <p className="text-sm text-slate-800">Estado: {item.state?.trim() ? item.state : '-'}</p>
                 <p className="text-sm text-slate-800">{item.primaryAddress ? 'Endereço principal' : 'Endereço adicional'}</p>
               </div>
             ))}

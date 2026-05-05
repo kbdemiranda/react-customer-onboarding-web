@@ -9,8 +9,12 @@ const addressItemSchema = z.object({
     .string()
     .min(1, 'CEP é obrigatório')
     .refine((value) => /^\d{8}$/.test(normalizeZipCode(value)), 'CEP inválido. Use o formato 00000-000 ou 00000000'),
+  street: z.string().trim().optional(),
   number: z.string().trim().min(1, 'Número é obrigatório'),
   complement: z.string().optional(),
+  neighborhood: z.string().trim().optional(),
+  city: z.string().trim().optional(),
+  state: z.string().trim().optional(),
   primaryAddress: z.boolean(),
 })
 

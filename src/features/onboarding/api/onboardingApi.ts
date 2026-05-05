@@ -22,6 +22,49 @@ export type UploadDocumentResponse = {
   documentType?: DocumentType
 }
 
+type ZipCodeLookupResponse = {
+  zipCode?: string | null
+  cep?: string | null
+  street?: string | null
+  logradouro?: string | null
+  neighborhood?: string | null
+  bairro?: string | null
+  city?: string | null
+  localidade?: string | null
+  state?: string | null
+  uf?: string | null
+}
+
+export type ZipCodeLookupResult = {
+  zipCode?: string
+  street?: string
+  neighborhood?: string
+  city?: string
+  state?: string
+}
+
+function normalizeDigits(value: string) {
+  return value.replace(/\D/g, '')
+}
+
+function toOptionalText(value: string | null | undefined) {
+  const text = value?.trim()
+  return text ? text : undefined
+}
+
+export async function searchZipCode(zipCode: string): Promise<ZipCodeLookupResult> {
+  const sanitizedZipCode = normalizeDigits(zipCode)
+  const { data } = await httpClient.get<ZipCodeLookupResponse>(`/api/v1/zip-codes/${sanitizedZipCode}`)
+
+  return {
+    zipCode: toOptionalText(data.zipCode) ?? toOptionalText(data.cep),
+    street: toOptionalText(data.street) ?? toOptionalText(data.logradouro),
+    neighborhood: toOptionalText(data.neighborhood) ?? toOptionalText(data.bairro),
+    city: toOptionalText(data.city) ?? toOptionalText(data.localidade),
+    state: toOptionalText(data.state) ?? toOptionalText(data.uf),
+  }
+}
+
 export async function uploadDocument(externalId: string, documentType: DocumentType, file: File) {
   const formData = new FormData()
   formData.append('documentType', documentType)
