@@ -8,6 +8,7 @@ import type { PersonalDataFormData } from '../types/onboarding.types'
 
 export type PersonalDataStepProps = {
   defaultValues?: Partial<PersonalDataFormData>
+  onBack: () => void
   onSubmit: (data: PersonalDataFormData) => Promise<void> | void
 }
 
@@ -43,7 +44,7 @@ function maskDate(value: string) {
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
 }
 
-export function PersonalDataStep({ defaultValues, onSubmit }: PersonalDataStepProps) {
+export function PersonalDataStep({ defaultValues, onBack, onSubmit }: PersonalDataStepProps) {
   const {
     register,
     handleSubmit,
@@ -189,13 +190,22 @@ export function PersonalDataStep({ defaultValues, onSubmit }: PersonalDataStepPr
         </div>
 
         <div className="pt-4">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="inline-flex w-full items-center justify-center rounded-md bg-[#003399] px-4 py-3.5 text-[15px] font-semibold text-white transition hover:bg-[#002266] disabled:cursor-not-allowed disabled:bg-blue-300"
-          >
-            {isSubmitting ? 'Continuando...' : 'Continuar'}
-          </button>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={onBack}
+              className="inline-flex w-full items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-3.5 text-[15px] font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Voltar
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex w-full items-center justify-center rounded-md bg-[#003399] px-4 py-3.5 text-[15px] font-semibold text-white transition hover:bg-[#002266] disabled:cursor-not-allowed disabled:bg-blue-300"
+            >
+              {isSubmitting ? 'Continuando...' : 'Continuar'}
+            </button>
+          </div>
           <p className="mt-5 text-center text-[13px] text-slate-500">
             Ao continuar, você concorda com nossos{' '}
             <a href="#" className="font-semibold text-[#003399] hover:underline">

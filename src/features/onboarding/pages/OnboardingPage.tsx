@@ -140,10 +140,30 @@ export function OnboardingPage() {
     setCurrentStep(3)
   }
 
+  const hasStartedOnboarding = Boolean(personalData || contactData || addressData || documentData || currentStep > 0)
+
+  const handleStatusNavigation = () => {
+    if (hasStartedOnboarding) {
+      const shouldLeave = window.confirm(
+        'Se você sair agora para consultar status, será necessário reiniciar o onboarding do zero. Deseja continuar?',
+      )
+
+      if (!shouldLeave) {
+        return
+      }
+    }
+
+    navigate('/onboarding/status')
+  }
+
   return (
-    <OnboardingLayout currentStep={Math.min(currentStep + 1, 5)}>
+    <OnboardingLayout currentStep={Math.min(currentStep + 1, 5)} onStatusClick={handleStatusNavigation}>
       {currentStep === 0 ? (
-        <PersonalDataStep defaultValues={personalData ?? undefined} onSubmit={handlePersonalDataSubmit} />
+        <PersonalDataStep
+          defaultValues={personalData ?? undefined}
+          onBack={() => navigate('/')}
+          onSubmit={handlePersonalDataSubmit}
+        />
       ) : null}
 
       {currentStep === 1 ? (

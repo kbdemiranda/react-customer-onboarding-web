@@ -7,13 +7,14 @@ import { OnboardingStepper } from './OnboardingStepper'
 export type OnboardingLayoutProps = {
   children: ReactNode
   currentStep: number
+  onStatusClick?: () => void
 }
 
 const ONBOARDING_STEPS = ['Dados', 'Contato', 'Endereço', 'Docs', 'Fim']
 
-export function OnboardingLayout({ children, currentStep }: OnboardingLayoutProps) {
+export function OnboardingLayout({ children, currentStep, onStatusClick }: OnboardingLayoutProps) {
   return (
-    <AppLayout>
+    <AppLayout onStatusClick={onStatusClick}>
       <div className="w-full max-w-[760px] space-y-8">
         <div className="text-center space-y-3">
           <h1 className="text-3xl font-bold text-[#0F172A] sm:text-[32px]">Abra sua conta</h1>

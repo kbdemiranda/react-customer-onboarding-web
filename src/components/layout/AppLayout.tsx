@@ -3,12 +3,14 @@ import { Header } from './Header'
 
 type AppLayoutProps = {
   children: ReactNode
+  onStatusClick?: () => void
+  showHeader?: boolean
 }
 
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({ children, onStatusClick, showHeader = true }: AppLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-[#F8FAFC]">
-      <Header />
+      {showHeader ? <Header onStatusClick={onStatusClick} /> : null}
       <main className="flex-1 px-4 py-10 sm:px-6 sm:py-12 flex flex-col items-center">
         {children}
       </main>

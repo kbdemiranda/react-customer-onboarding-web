@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 import { AppLayout } from '../../../components/layout/AppLayout'
-import { Header } from '../../../components/layout/Header'
 import {
   getOnboardingAuditLogs,
   getOnboardingByExternalId,
@@ -74,6 +74,7 @@ function getErrorMessage(error: unknown, fallbackMessage: string) {
 }
 
 export function OnboardingStatusPage() {
+  const navigate = useNavigate()
   const [searchValue, setSearchValue] = useState('')
   const [validationError, setValidationError] = useState<string | null>(null)
   const [lookupResult, setLookupResult] = useState<LookupOutcome | null>(null)
@@ -158,8 +159,6 @@ export function OnboardingStatusPage() {
 
   return (
     <AppLayout>
-      <Header />
-
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <div className="mx-auto w-full max-w-xl">
           <div className="mb-8 text-center">
@@ -192,6 +191,14 @@ export function OnboardingStatusPage() {
               className="inline-flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
             >
               {lookupMutation.isPending ? 'Buscando cadastro...' : 'Buscar'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Voltar
             </button>
           </form>
 
