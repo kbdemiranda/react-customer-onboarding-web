@@ -18,6 +18,38 @@ Current main routes:
 - `/onboarding`
 - `/onboarding/status`
 
+## System Demo
+
+> Add demo assets here (GIFs, screenshots, short videos, or links).
+
+Suggested blocks:
+- Demo URL: `https://your-demo-url`
+- Main flow video: `https://your-video-url`
+- Screenshots:
+  - Home/Start
+  - Personal Data Step
+  - Contact Step
+  - Address Step
+  - Documents Step
+  - Review/Confirmation
+
+Example markdown snippet:
+
+```md
+## System Demo
+
+### Live Demo
+[Open demo](https://your-demo-url)
+
+### Main Flow (Video)
+[Watch video](https://your-video-url)
+
+### Screenshots
+![Home](./docs/images/home.png)
+![Personal Data](./docs/images/personal-data.png)
+![Documents](./docs/images/documents.png)
+```
+
 ## Tech Stack
 
 - Vite
