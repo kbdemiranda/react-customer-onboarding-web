@@ -14,6 +14,8 @@ export type DocumentsStepProps = {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 const ALLOWED_FILE_TYPES = ['application/pdf', 'image/png', 'image/jpeg'] as const
+const PDF_FILE_TYPE = 'application/pdf'
+const PROOF_OF_ADDRESS_ACCEPT = '.png,.jpeg,.jpg,.pdf,image/png,image/jpeg,application/pdf'
 
 const localDocumentSchema = z.object({
   identityType: z.enum(['RG', 'CNH'], { error: 'Selecione o tipo de documento' }),
@@ -54,6 +56,12 @@ const localDocumentSchema = z.object({
         })
       }
     }
+  } else if (data.frontFile instanceof File && data.frontFile.type !== PDF_FILE_TYPE) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Para CNH Digital, envie um arquivo em PDF',
+      path: ['frontFile'],
+    })
   }
 })
 
@@ -73,12 +81,14 @@ function FileUploadArea({
   file,
   error,
   onChange,
+  accept,
 }: {
   label: string
   description: string
   file: File | null
   error?: string
   onChange: (file: File | null) => void
+  accept?: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -98,7 +108,7 @@ function FileUploadArea({
       >
         <input
           type="file"
-          accept=".pdf,.png,.jpg,.jpeg"
+          accept={accept ?? '.pdf,.png,.jpg,.jpeg'}
           className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
           onChange={handleFileChange}
           ref={inputRef}
@@ -296,6 +306,7 @@ export function DocumentsStep({ defaultValues, onBack, onSubmit }: DocumentsStep
                 file={field.value}
                 error={errors.frontFile?.message as string | undefined}
                 onChange={field.onChange}
+                accept={isDigital ? '.pdf,application/pdf' : undefined}
               />
             )}
           />
@@ -328,6 +339,7 @@ export function DocumentsStep({ defaultValues, onBack, onSubmit }: DocumentsStep
                 file={field.value}
                 error={errors.proofOfAddress?.message as string | undefined}
                 onChange={field.onChange}
+                accept={PROOF_OF_ADDRESS_ACCEPT}
               />
             )}
           />
