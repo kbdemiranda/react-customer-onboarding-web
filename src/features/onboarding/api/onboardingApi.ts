@@ -1,5 +1,11 @@
 import { httpClient } from '../../../lib/http'
-import type { DocumentType } from '../types/onboarding.types'
+import type {
+  DocumentType,
+  OnboardingAuditLog,
+  OnboardingDocument,
+  OnboardingItem,
+  OnboardingsSearchResponse,
+} from '../types/onboarding.types'
 import type { CreateOnboardingPayload } from './onboardingPayloadMapper'
 
 export type CreateOnboardingResponse = {
@@ -27,5 +33,31 @@ export async function uploadDocument(externalId: string, documentType: DocumentT
     },
   })
 
+  return data
+}
+
+export async function getOnboardingByExternalId(externalId: string) {
+  const { data } = await httpClient.get<OnboardingItem>(`/api/v1/onboardings/${externalId}`)
+  return data
+}
+
+export async function searchOnboardingsByCpf(cpf: string) {
+  const { data } = await httpClient.get<OnboardingsSearchResponse>('/api/v1/onboardings', {
+    params: {
+      cpf,
+      page: 0,
+      size: 1,
+    },
+  })
+  return data
+}
+
+export async function getOnboardingDocuments(externalId: string) {
+  const { data } = await httpClient.get<OnboardingDocument[]>(`/api/v1/onboardings/${externalId}/documents`)
+  return data
+}
+
+export async function getOnboardingAuditLogs(externalId: string) {
+  const { data } = await httpClient.get<OnboardingAuditLog[]>(`/api/v1/onboardings/${externalId}/audit-logs`)
   return data
 }
