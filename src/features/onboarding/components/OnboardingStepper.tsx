@@ -5,8 +5,8 @@ export type OnboardingStepperProps = {
 
 export function OnboardingStepper({ steps, currentStep }: OnboardingStepperProps) {
   return (
-    <section aria-label="Etapas do onboarding" className="overflow-x-auto pb-1">
-      <ol className="flex min-w-max items-start gap-3 sm:gap-4">
+    <div aria-label="Etapas do onboarding" className="w-full">
+      <ol className="flex w-full items-center justify-between">
         {steps.map((step, index) => {
           const stepNumber = index + 1
           const isCompleted = stepNumber < currentStep
@@ -15,14 +15,14 @@ export function OnboardingStepper({ steps, currentStep }: OnboardingStepperProps
           const connectorActive = stepNumber < currentStep
 
           return (
-            <li key={step} className="flex items-center gap-3">
-              <div className="flex min-w-[94px] flex-col items-center gap-2 text-center sm:min-w-[108px]">
+            <li key={step} className={`flex items-center ${index < steps.length - 1 ? 'w-full' : ''}`}>
+              <div className="relative flex flex-col items-center group">
                 <span
                   className={[
-                    'flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold transition-colors',
+                    'relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 text-[13px] font-semibold transition-colors',
                     isActive
-                      ? 'border-blue-600 bg-blue-600 text-white'
-                      : 'border-slate-300 bg-white text-slate-500',
+                      ? 'border-[#003399] bg-[#003399] text-white'
+                      : 'border-slate-200 bg-white text-slate-400',
                   ].join(' ')}
                   aria-current={isCurrent ? 'step' : undefined}
                 >
@@ -30,8 +30,8 @@ export function OnboardingStepper({ steps, currentStep }: OnboardingStepperProps
                 </span>
                 <span
                   className={[
-                    'text-xs font-medium sm:text-sm',
-                    isActive ? 'text-slate-900' : 'text-slate-500',
+                    'absolute top-10 whitespace-nowrap text-[13px] font-medium',
+                    isActive ? 'text-[#003399]' : 'text-slate-400',
                   ].join(' ')}
                 >
                   {step}
@@ -39,11 +39,11 @@ export function OnboardingStepper({ steps, currentStep }: OnboardingStepperProps
               </div>
 
               {index < steps.length - 1 ? (
-                <span
+                <div
                   aria-hidden="true"
                   className={[
-                    'mb-6 block h-px w-8 rounded-full sm:w-10',
-                    connectorActive ? 'bg-blue-600' : 'bg-slate-300',
+                    'h-[2px] w-full flex-1 mx-2',
+                    connectorActive ? 'bg-[#003399]' : 'bg-slate-200',
                   ].join(' ')}
                 />
               ) : null}
@@ -51,6 +51,8 @@ export function OnboardingStepper({ steps, currentStep }: OnboardingStepperProps
           )
         })}
       </ol>
-    </section>
+      {/* We add a spacer to accommodate the absolute text below the circles */}
+      <div className="h-6" />
+    </div>
   )
 }
