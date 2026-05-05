@@ -17,6 +17,10 @@ export const personalDataSchema = z.object({
       const normalizedCpf = normalizeCpf(value)
       return /^\d{11}$/.test(normalizedCpf)
     }, 'CPF inválido. Use o formato 000.000.000-00 ou 00000000000'),
+  birthDate: z
+    .string()
+    .min(1, 'Data de nascimento é obrigatória')
+    .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Use o formato DD/MM/AAAA'),
 })
 
 export type PersonalDataSchema = z.infer<typeof personalDataSchema>

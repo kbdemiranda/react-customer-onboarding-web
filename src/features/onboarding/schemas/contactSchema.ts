@@ -2,7 +2,11 @@ import { z } from 'zod'
 
 const emailItemSchema = z.object({
   email: z.string().trim().min(1, 'E-mail é obrigatório').email('E-mail inválido'),
+  confirmEmail: z.string().trim().min(1, 'Confirmação de e-mail é obrigatória').email('E-mail inválido'),
   primaryEmail: z.boolean(),
+}).refine(data => data.email === data.confirmEmail, {
+  message: 'Os e-mails não conferem',
+  path: ['confirmEmail'],
 })
 
 const phoneItemSchema = z.object({

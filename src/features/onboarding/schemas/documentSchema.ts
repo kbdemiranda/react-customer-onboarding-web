@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024
+const MAX_FILE_SIZE = 10 * 1024 * 1024
 const ALLOWED_FILE_TYPES = ['application/pdf', 'image/png', 'image/jpeg'] as const
 
 export const documentTypeSchema = z.enum(['IDENTITY', 'PROOF_OF_ADDRESS', 'INCOME_PROOF'], {
