@@ -1,4 +1,5 @@
 import { httpClient } from '../../../lib/http'
+import { buildDocumentUploadFormData } from '../mappers/documentUploadMapper'
 import type {
   DocumentType,
   OnboardingAuditLog,
@@ -65,10 +66,8 @@ export async function searchZipCode(zipCode: string): Promise<ZipCodeLookupResul
   }
 }
 
-export async function uploadDocument(externalId: string, documentType: DocumentType, file: File) {
-  const formData = new FormData()
-  formData.append('documentType', documentType)
-  formData.append('file', file)
+export async function uploadDocument(externalId: string, documentType: DocumentType, file: File, isDigital?: boolean) {
+  const formData = buildDocumentUploadFormData({ documentType, file, isDigital })
 
   const { data } = await httpClient.post<UploadDocumentResponse>(`/api/v1/onboardings/${externalId}/documents`, formData, {
     headers: {

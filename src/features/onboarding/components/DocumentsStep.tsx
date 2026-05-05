@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import type { DocumentFormData, DocumentType } from '../types/onboarding.types'
+import { mapIdentityTypeToDocumentType } from '../mappers/documentTypeMapper'
 
 export type DocumentsStepProps = {
   defaultValues?: Partial<DocumentFormData>
@@ -157,7 +158,9 @@ function FileUploadArea({
 }
 
 export function DocumentsStep({ defaultValues, onBack, onSubmit }: DocumentsStepProps) {
-  const identityFiles = defaultValues?.documents?.filter((d) => d.documentType === 'IDENTITY') ?? []
+  const identityFiles = defaultValues?.documents?.filter(
+    (d) => d.documentType === 'IDENTITY_REGISTER' || d.documentType === 'DRIVER_LICENSE',
+  ) ?? []
   const defaultFrontFile = identityFiles[0]?.file ?? null
   const defaultBackFile = identityFiles[1]?.file ?? null
   const defaultProofOfAddress = defaultValues?.documents?.find((d) => d.documentType === 'PROOF_OF_ADDRESS')?.file ?? null
@@ -185,12 +188,13 @@ export function DocumentsStep({ defaultValues, onBack, onSubmit }: DocumentsStep
   const isDigital = identityType === 'CNH' && cnhDigital
 
   const handleLocalSubmit = (data: LocalDocumentData) => {
+    const identityDocumentType = mapIdentityTypeToDocumentType(data.identityType)
     const documents: { documentType: DocumentType; file: File }[] = [
-      { documentType: 'IDENTITY', file: data.frontFile as File },
+      { documentType: identityDocumentType, file: data.frontFile as File },
     ]
 
     if (!(data.identityType === 'CNH' && data.cnhDigital) && data.backFile) {
-      documents.push({ documentType: 'IDENTITY', file: data.backFile as File })
+      documents.push({ documentType: identityDocumentType, file: data.backFile as File })
     }
 
     if (data.proofOfAddress) {

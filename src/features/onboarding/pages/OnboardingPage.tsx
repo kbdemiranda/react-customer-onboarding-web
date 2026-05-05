@@ -51,8 +51,8 @@ export function OnboardingPage() {
   })
 
   const uploadDocumentMutation = useMutation({
-    mutationFn: ({ externalId, documentType, file }: { externalId: string; documentType: DocumentType; file: File }) =>
-      uploadDocument(externalId, documentType, file),
+    mutationFn: ({ externalId, documentType, file, isDigital }: { externalId: string; documentType: DocumentType; file: File; isDigital?: boolean }) =>
+      uploadDocument(externalId, documentType, file, isDigital),
   })
 
   const isSubmitting = createOnboardingMutation.isPending || uploadDocumentMutation.isPending
@@ -101,6 +101,7 @@ export function OnboardingPage() {
             externalId: createResponse.externalId,
             documentType: documentItem.documentType,
             file: documentItem.file,
+            isDigital: documentItem.documentType === 'DRIVER_LICENSE' ? Boolean(documentData.cnhDigital) : undefined,
           })
         } catch {
           failedUploads += 1
